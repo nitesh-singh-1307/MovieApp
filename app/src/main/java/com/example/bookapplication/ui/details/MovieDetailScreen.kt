@@ -45,7 +45,7 @@ fun MovieDetailScreen(
             )
         }
 
-        AnimatedVisibility(visible = !state.isLoading && state.error == null) {
+        AnimatedVisibility(visible = !state.isLoading && state.error.isEmpty()) {
             BoxWithConstraints(
                 modifier = modifier.fillMaxWidth()
             ) {
@@ -62,7 +62,7 @@ fun MovieDetailScreen(
                     DetailBodyContent(
                         movieDetail = movieDetail,
                         movie = state.movies,
-                        isMovieLoading = state.isLoading,
+                        isMovieLoading = state.isMovieLoading,
                         fetchMovies = movieDetailViewModel::fetchMovie,
                         onMovieClick = onMovieClick,
                         onActorClick = onActorClick,

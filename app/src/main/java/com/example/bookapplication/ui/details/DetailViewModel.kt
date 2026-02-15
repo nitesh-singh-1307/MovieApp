@@ -43,14 +43,14 @@ class DetailViewModel @Inject constructor(
     private fun fetchDetailsById() = viewModelScope.launch {
 
         if (movieId == -1) {
-            _state.update { it.copy(isLoading = true, error = "Movie not found") }
+            _state.update { it.copy(isLoading = false, error = "Movie not found") }
         } else {
             repository.fetchMovieDetail(movieId).collectAndHandle(
                 onError = { error ->
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            error = "null"
+                            error = error?.message ?: "Failed to load movie details"
                         )
                     }
                 },
@@ -58,7 +58,7 @@ class DetailViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             isLoading = true,
-                            error = "null"
+                            error = ""
                         )
 
                     }
@@ -67,9 +67,10 @@ class DetailViewModel @Inject constructor(
                 Log.d("DetailViewModel:::", "fetchDetailsById: $movieDetail")
                 _state.update {
                     it.copy(
+                        isLoading = false,
                         isMovieLoading = false,
                         movieDetail = movieDetail,
-                        error = "null"
+                        error = ""
                     )
                 }
             }
@@ -90,8 +91,8 @@ class DetailViewModel @Inject constructor(
             onLoading = {
                 _state.update {
                     it.copy(
-                        isLoading = true,
-                        error = "null"
+                        isMovieLoading = true,
+                        error = ""
                     )
 
                 }
@@ -99,9 +100,10 @@ class DetailViewModel @Inject constructor(
         ) { movieDetail ->
             _state.update {
                 it.copy(
+                    isLoading = false,
                     isMovieLoading = false,
                     movies = movieDetail,
-                    error = "null"
+                    error = ""
                 )
 
             }
@@ -109,4 +111,3 @@ class DetailViewModel @Inject constructor(
 
     }
 }
-

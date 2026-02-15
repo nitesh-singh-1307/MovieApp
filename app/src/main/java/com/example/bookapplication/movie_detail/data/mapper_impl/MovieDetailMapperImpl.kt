@@ -27,21 +27,26 @@ class MovieDetailMapperImpl : ApiMapper<MovieDetail, MovieDetailDto> {
     }
 
     private fun formatTimeStamp(pattern: String = "dd.MM.yy", timestamp: String): String {
+        if (timestamp.isBlank()) return ""
 
-        val inputDateFormat = SimpleDateFormat("yyyy-MM-dd 'T' HH:mm:ss.SSS'Z'", Locale.getDefault())
         val outputDateFormat = SimpleDateFormat(pattern, Locale.getDefault())
-        // Parse the input date string into a Date object
-        val date = inputDateFormat.parse(timestamp)
-        // Format the Date object into the desired output string
-        val formattedDate = date?.let { outputDateFormat.format(it) } ?: timestamp
-        return formattedDate
+        val supportedFormats = listOf(
+            "yyyy-MM-dd",
+            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "yyyy-MM-dd'T'HH:mm:ss'Z'"
+        )
+
+        supportedFormats.forEach { datePattern ->
+            runCatching {
+                SimpleDateFormat(datePattern, Locale.getDefault()).parse(timestamp)
+            }.getOrNull()?.let { date ->
+                return outputDateFormat.format(date)
+            }
+        }
+
+        return timestamp
     }
 
-    private fun convertMinutesToHoursAndMinutes(minutes: Int): String {
-        val hours = minutes / 60
-        val remainingMinutes = minutes % 60
-        return "${hours}h:${remainingMinutes}m"
-    }
 
     private fun formatEmptyValue(value: String, defaultValue: String): String{
         return value.ifEmpty { defaultValue }
@@ -49,12 +54,12 @@ class MovieDetailMapperImpl : ApiMapper<MovieDetail, MovieDetailDto> {
 
     override fun mapToDomain(apiDto: MovieDetailDto): MovieDetail {
         return MovieDetail(
-            backdropPath = apiDto.backdropPath!!,
-            budget = apiDto.budget!!,
-            homepage = apiDto.homepage!!,
+            backdropPath = apiDto.backdropPath.orEmpty(),
+            budget = apiDto.budget ?: 0,
+            homepage = apiDto.homepage.orEmpty(),
             id = apiDto.id,
             imdbId = formatEmptyValue(apiDto.imdbId ?: "", ""),
-            originalLanguage = apiDto.originalLanguage!!,
+            originalLanguage = apiDto.originalLanguage.orEmpty(),
             originalTitle = formatEmptyValue(apiDto.originalTitle ?: "", ""),
             overview = formatEmptyValue(apiDto.overview ?: "", ""),
             popularity = apiDto.popularity ?: 0.0,
@@ -62,8 +67,8 @@ class MovieDetailMapperImpl : ApiMapper<MovieDetail, MovieDetailDto> {
             productionCompanies = apiDto.productionCompanies ?: emptyList(),
             productionCountries = apiDto.productionCountries ?: emptyList(),
             releaseDate = formatTimeStamp(timestamp = apiDto.releaseDate ?: ""),
-            revenue = apiDto.revenue!!,
-            runtime = apiDto.runtime!!,
+            revenue = apiDto.revenue ?: 0,
+            runtime = apiDto.runtime ?: 0,
             spokenLanguages = apiDto.spokenLanguages ?: emptyList(),
             status = formatEmptyValue(apiDto.status ?: "", ""),
             tagline = formatEmptyValue(apiDto.tagline ?: "", ""),
