@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -38,7 +39,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.bookapplication.domain.models.Movie
-import com.example.bookapplication.movie_detail.data.remote.models.ProductionCountry
 import com.example.bookapplication.movie_detail.domain.models.MovieDetail
 import com.example.bookapplication.movie_detail.domain.models.Review
 import com.example.bookapplication.ui.home.components.MovieCard
@@ -57,13 +57,13 @@ fun DetailBodyContent(
     onActorClick: (Int) -> Unit
 ) {
 
-    LazyColumn(modifier) {
+    LazyColumn(modifier = modifier) {
         item {
             Card(
-                modifier = modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
-                    modifier = modifier
+                    modifier = Modifier
                         .fillMaxWidth()
                         .padding(defaultPadding)
                 ) {
@@ -80,7 +80,7 @@ fun DetailBodyContent(
                             movieDetail.genres.forEachIndexed { index, genreText ->
                                 Text(
                                     text = genreText.toString(),
-                                    modifier = modifier.padding(6.dp),
+                                    modifier = Modifier.padding(6.dp),
                                     maxLines = 1,
                                     style = MaterialTheme.typography.bodySmall
                                 )
@@ -98,7 +98,7 @@ fun DetailBodyContent(
                         }
 
                     }
-                    Spacer(modifier = modifier.height(itemSpacing))
+                    Spacer(modifier = Modifier.height(itemSpacing))
                     Text(
                         text = movieDetail.title,
                         style = MaterialTheme.typography.titleLarge,
@@ -151,16 +151,17 @@ fun DetailBodyContent(
                         }
                     }
                     LazyRow {
-                        items(movieDetail.cast) {
+                        itemsIndexed(movieDetail.cast) { index, cast ->
                             ActorItem(
-                                cast = it,
+                                cast = cast,
                                 modifier = Modifier
-                                    .weight(1f)
                                     .clickable {
-                                        onActorClick(it.id)
+                                        onActorClick(cast.id)
                                     }
                             )
-                            Spacer(modifier = Modifier.width(defaultPadding))
+                            if (index != movieDetail.cast.lastIndex) {
+                                Spacer(modifier = Modifier.width(defaultPadding))
+                            }
 
                         }
 
@@ -331,8 +332,10 @@ private fun Review(
             Spacer(modifier = Modifier.height(itemSpacing))
 
         }
-        TextButton(onClick = { setViewMore(!viewMore) }) {
-            Text(text = btnText)
+        if (reviews.size > defaultReviews.size) {
+            TextButton(onClick = { setViewMore(!viewMore) }) {
+                Text(text = btnText)
+            }
         }
     }
 }
